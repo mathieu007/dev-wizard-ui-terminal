@@ -1,0 +1,92 @@
+# OS
+.DS_Store
+
+# Env & logs
+.env*
+!*.env.example
+!.envrc
+*.log
+*.log.*
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.yarn
+.yarn/**/
+apps/
+.pack-cache/
+tmp-generated/**
+.env
+pnpm-lock.yaml
+CONVERSATION.SUMMARY.md
+COMMIT.SUMMARY.md
+**/.dev-wizard/
+
+# TypeScript metadata
+**/*.tsbuildinfo
+
+# Dev Wizard engine build artifacts (keep src TS-only)
+packages/dev-wizard-engine/src/**/*.js
+packages/dev-wizard-engine/src/**/*.js.map
+packages/dev-wizard-engine/src/**/*.d.ts
+
+# Next.js / build outputs
+**/.next
+**/out
+**/dist
+**/build
+**/coverage
+**/__generated__
+
+# Tooling caches
+.turbo
+
+# Generated apps (ignored by default)
+
+# App-specific heavy artifacts (in case apps/ is tracked)
+apps/**/node_modules
+apps/**/.next
+apps/**/out
+apps/**/dist
+apps/**/build
+apps/**/coverage
+apps/**/.turbo
+apps/**/.vercel
+apps/**/prisma/dev.db*
+apps/**/next-env.d.ts
+apps/**/pnpm-lock.yaml
+apps/**/yarn.lock
+apps/**/package-lock.json
+packages/prisma-rpc-generator/examples/**/node_modules
+packages/prisma-rpc-generator/examples/**/pnpm-lock.yaml
+packages/prisma-rpc-generator/examples/**/yarn.lock
+packages/prisma-rpc-generator/examples/**/package-lock.json
+packages/prisma-rpc-generator/examples/**/dist
+packages/prisma-rpc-generator/examples/**/build
+packages/prisma-rpc-generator/examples/**/.next
+packages/prisma-rpc-generator/examples/**/coverage
+packages/prisma-rpc-generator/examples/**/src/__generated__
+playgrounds/**/node_modules
+playgrounds/**/pnpm-lock.yaml
+playgrounds/**/yarn.lock
+playgrounds/**/package-lock.json
+playgrounds/**/.next
+playgrounds/**/dist
+playgrounds/**/build
+playgrounds/**/coverage
+
+# Repo-wide node_modules (fallback)
+**/node_modules
+node_modules/
+ 
+# Generator local data (custom bundles, etc.)
+generator/.data
+
+# Verification / temp directories
+tmp/
+src/__generated__/
+.prisma/
+prisma/dev.db*
+**/.prisma-rpc-manifest.lock
+.reports/
+reports/

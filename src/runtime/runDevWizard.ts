@@ -86,7 +86,7 @@ export async function runDevWizard(options: DevWizardOptions): Promise<DevWizard
 	intro(chalk.cyan("Dev Wizard"));
 
 	const interactiveTty = Boolean(process.stdin.isTTY && process.stdout.isTTY);
-	const repoRoot = process.cwd();
+	let repoRoot = process.cwd();
 	const registerManifestPath = options.registerManifestPath
 		? path.isAbsolute(options.registerManifestPath)
 			? options.registerManifestPath
@@ -197,6 +197,30 @@ if (isRegisterMode) {
 		return { exitCode: 1 };
 	}
 
+	const explicitConfigCount = Array.isArray(options.configPath)
+		? options.configPath.length
+		: options.configPath
+			? 1
+			: 0;
+
+	if (configResolution.paths.length === 0 && explicitConfigCount === 0) {
+		const defaultSelection = await resolveDefaultConfigPathWithFallback(repoRoot);
+		if (defaultSelection) {
+			repoRoot = defaultSelection.repoRoot;
+			options.configPath = defaultSelection.path;
+			log.info(
+				`Using ${chalk.cyan(
+					relativeToRepo(repoRoot, defaultSelection.path),
+				)} for this run.`,
+			);
+			configResolution = await resolveConfigPaths({
+				cwd: repoRoot,
+				explicitPaths: options.configPath,
+				environment: effectiveEnvironment,
+			});
+		}
+	}
+
 	if (configResolution.paths.length === 0) {
 		if (!interactiveTty) {
 			handleFatalError(
@@ -208,8 +232,8 @@ if (isRegisterMode) {
 			return { exitCode: 1 };
 		}
 		try {
-			const selectedConfigPath = await selectConfigPath(repoRoot);
-			if (!selectedConfigPath) {
+			const selection = await resolveConfigPathWithFallback(repoRoot);
+			if (!selection) {
 				handleFatalError(
 					new Error(
 						"No Dev Wizard configuration files were found. Add a config file or provide --config <path>.",
@@ -218,7 +242,8 @@ if (isRegisterMode) {
 				);
 				return { exitCode: 1 };
 			}
-			options.configPath = selectedConfigPath;
+			repoRoot = selection.repoRoot;
+			options.configPath = selection.path;
 			configResolution = await resolveConfigPaths({
 				cwd: repoRoot,
 				explicitPaths: options.configPath,
@@ -495,7 +520,7 @@ if (isRegisterMode) {
 				providedSlug: options.answersIdentity,
 				providedSegments: options.answersIdentitySegments,
 				providedSegmentDetails: options.answersIdentitySegmentDetails,
-				usingExternalAnswers: Boolean(options.answersPathUsed),
+				usingExternalAnswers: Boolean(options.loadPersistedAnswers),
 				interactive: interactiveTty,
 			});
 		} catch (error) {
@@ -621,7 +646,7 @@ if (isRegisterMode) {
 		promptPersistence &&
 		promptPersistence.didLoadExistingSnapshot() &&
 		interactiveTty &&
-		!options.answersPathUsed
+		(!options.answersPathUsed || options.answersPathImplicit)
 	) {
 		try {
 			const persistedAnswersStrategy = await promptForPersistedAnswersStrategy({
@@ -673,7 +698,10 @@ if (isRegisterMode) {
 			? true
 			: options.phase === "collect"
 				? false
-				: Boolean(options.answersPathUsed) || !interactiveTty;
+				: !interactiveTty ||
+					(Boolean(options.loadPersistedAnswers) &&
+						Boolean(options.answersPathUsed) &&
+						!options.answersPathImplicit);
 
 	const promptDriver = nonInteractive
 		? new NonInteractivePromptDriver()
@@ -1611,9 +1639,9 @@ function applyIdentityMetadataOverrides(
 	}
 
 async function collectIdentityAnswerFiles(dir: string): Promise<string[]> {
-	let entries: Array<{ name: string; isFile(): boolean; isDirectory(): boolean }>;
+	let entries: Dirent<string>[];
 	try {
-		entries = await readdir(dir, { withFileTypes: true });
+		entries = await readDirents(dir);
 	} catch (error) {
 		if (
 			(error as NodeJS.ErrnoException).code === "ENOENT" ||
@@ -2399,6 +2427,11 @@ const CONFIG_PICKER_IGNORE_DIRS = new Set([
 	"tmp",
 ]);
 
+const DEFAULT_CONFIG_DIRS = [
+	"dev-wizard-config",
+	path.join("packages", "dev-wizard-presets", "dev-wizard-config"),
+];
+
 const WIZARD_CONFIG_EXTENSIONS = [".yaml", ".yml", ".json", ".json5"];
 
 async function selectConfigPath(repoRoot: string): Promise<string | null> {
@@ -2428,6 +2461,103 @@ async function selectConfigPath(repoRoot: string): Promise<string | null> {
 		throw new Error("Configuration selection returned a non-string value.");
 	}
 	return choice;
+}
+
+async function resolveConfigPathWithFallback(
+	repoRoot: string,
+): Promise<{ path: string; repoRoot: string } | null> {
+	const primary = await selectConfigPath(repoRoot);
+	if (primary) {
+		return { path: primary, repoRoot };
+	}
+
+	const fallbackRoot = await findWorkspaceRoot(repoRoot);
+	if (!fallbackRoot || fallbackRoot === repoRoot) {
+		return null;
+	}
+
+	const fallback = await selectConfigPath(fallbackRoot);
+	if (!fallback) {
+		return null;
+	}
+
+	return { path: fallback, repoRoot: fallbackRoot };
+}
+
+async function resolveDefaultConfigPathWithFallback(
+	repoRoot: string,
+): Promise<{ path: string; repoRoot: string } | null> {
+	const primary = await findDefaultConfigPath(repoRoot);
+	if (primary) {
+		return { path: primary, repoRoot };
+	}
+
+	const fallbackRoot = await findWorkspaceRoot(repoRoot);
+	if (!fallbackRoot || fallbackRoot === repoRoot) {
+		return null;
+	}
+
+	const fallback = await findDefaultConfigPath(fallbackRoot);
+	if (!fallback) {
+		return null;
+	}
+
+	return { path: fallback, repoRoot: fallbackRoot };
+}
+
+async function findWorkspaceRoot(start: string): Promise<string | undefined> {
+	let current = path.resolve(start);
+	const root = path.parse(current).root;
+	let fallbackGitDir: string | undefined;
+
+	while (true) {
+		if (await isWorkspaceRoot(current)) {
+			return current;
+		}
+		if (!fallbackGitDir && (await pathExists(path.join(current, ".git")))) {
+			fallbackGitDir = current;
+		}
+		if (current === root) {
+			break;
+		}
+		current = path.dirname(current);
+	}
+
+	return fallbackGitDir;
+}
+
+async function findDefaultConfigPath(repoRoot: string): Promise<string | undefined> {
+	for (const dir of DEFAULT_CONFIG_DIRS) {
+		for (const filename of INDEX_FILENAMES) {
+			const candidate = path.join(repoRoot, dir, filename);
+			if (await pathExists(candidate)) {
+				return candidate;
+			}
+		}
+	}
+	return undefined;
+}
+
+async function isWorkspaceRoot(dir: string): Promise<boolean> {
+	if (await pathExists(path.join(dir, "pnpm-workspace.yaml"))) {
+		return true;
+	}
+	if (await pathExists(path.join(dir, "pnpm-workspace.yml"))) {
+		return true;
+	}
+	if (await pathExists(path.join(dir, "workspace.repos.json"))) {
+		return true;
+	}
+	if (await pathExists(path.join(dir, "dev-wizard-config"))) {
+		return true;
+	}
+	for (const candidate of ROOT_CONFIG_CANDIDATES) {
+		if (await pathExists(path.join(dir, candidate))) {
+			return true;
+		}
+	}
+	const presetsRoot = path.join(dir, "packages", "dev-wizard-presets");
+	return pathExists(presetsRoot);
 }
 
 async function collectConfigPickerCandidates(

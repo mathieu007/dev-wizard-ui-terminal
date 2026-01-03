@@ -13,7 +13,7 @@ import chalk from "chalk";
 import path from "node:path";
 import { createHash } from "node:crypto";
 import type { Dirent } from "node:fs";
-import { readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { readFile, readdir, stat, writeFile, mkdir } from "node:fs/promises";
 import { loadConfig } from "@dev-wizard/engine/loader/configLoader.js";
 import {
 	INDEX_FILENAMES,
@@ -559,6 +559,60 @@ if (isRegisterMode) {
 		};
 	}
 
+		const lockDefaultAnswersAlias =
+			scenario.id === "workspace-bootstrap" &&
+			!resolvedAnswersPath;
+		const workspaceBootstrapAnswersPath = path.join(
+			repoRoot,
+			".dev-wizard",
+			"answers",
+			"workspace",
+			"bootstrap.json",
+		);
+		const legacyWorkspaceBootstrapAnswersPath = path.join(
+			repoRoot,
+			".dev-wizard",
+			"answers",
+			"workspace-bootstrap.json",
+		);
+
+		if (lockDefaultAnswersAlias) {
+			answersAlias = "workspace/bootstrap";
+			persistencePath = workspaceBootstrapAnswersPath;
+			if (
+				(await pathExists(legacyWorkspaceBootstrapAnswersPath)) &&
+				!(await pathExists(workspaceBootstrapAnswersPath))
+			) {
+				try {
+					await mkdir(path.dirname(workspaceBootstrapAnswersPath), {
+						recursive: true,
+					});
+					const legacyContents = await readFile(
+						legacyWorkspaceBootstrapAnswersPath,
+						"utf8",
+					);
+					await writeFile(
+						workspaceBootstrapAnswersPath,
+						legacyContents,
+						"utf8",
+					);
+					log.warn(
+						`Migrated legacy workspace bootstrap answers from ${chalk.cyan(
+							relativeToRepo(repoRoot, legacyWorkspaceBootstrapAnswersPath),
+						)} to ${chalk.cyan(
+							relativeToRepo(repoRoot, workspaceBootstrapAnswersPath),
+						)}.`,
+					);
+				} catch (error) {
+					log.warn(
+						`Failed to migrate legacy workspace bootstrap answers: ${String(
+							error,
+						)}`,
+					);
+				}
+			}
+		}
+
 		if (resolvedAnswersPath) {
 			persistencePath = resolvedAnswersPath;
 			const derivedAlias = path.basename(
@@ -575,29 +629,29 @@ if (isRegisterMode) {
 				scenario.id,
 				identitySelection,
 			);
-		} else if (!options.loadPersistedAnswers) {
-		if (interactiveTty) {
-			const selectedAlias = await text({
-				message:
-					"Name for the answers file (stored under .dev-wizard/answers/<name>.json):",
-				initialValue: scenario.id,
-				placeholder: scenario.id,
-			});
-			if (isCancel(selectedAlias)) {
-				cancel("Execution cancelled before collecting answers.");
-				await logWriter?.close().catch(() => undefined);
-				await promptHistory.close().catch(() => undefined);
-				return { exitCode: 0 };
+		} else if (!options.loadPersistedAnswers && !lockDefaultAnswersAlias) {
+			if (interactiveTty) {
+				const selectedAlias = await text({
+					message:
+						"Name for the answers file (stored under .dev-wizard/answers/<name>.json):",
+					initialValue: scenario.id,
+					placeholder: scenario.id,
+				});
+				if (isCancel(selectedAlias)) {
+					cancel("Execution cancelled before collecting answers.");
+					await logWriter?.close().catch(() => undefined);
+					await promptHistory.close().catch(() => undefined);
+					return { exitCode: 0 };
+				}
+				const trimmed = selectedAlias.trim();
+				if (trimmed.length > 0) {
+					answersAlias = trimmed;
+				}
+			} else {
+				log.info(
+					`Using default answers file name ${chalk.cyan(answersAlias)} (interactive prompt disabled).`,
+				);
 			}
-			const trimmed = selectedAlias.trim();
-			if (trimmed.length > 0) {
-				answersAlias = trimmed;
-			}
-		} else {
-			log.info(
-				`Using default answers file name ${chalk.cyan(answersAlias)} (interactive prompt disabled).`,
-			);
-		}
 	}
 
 		promptPersistence = await createPromptPersistenceManager({

@@ -1,4 +1,4 @@
-import type { PromptDriver } from "@dev-wizard/engine/runtime/promptDriver.js";
+import type { PromptDriver } from "@ScaffoldStack/dev-wizard-engine/runtime/promptDriver.js";
 export declare class ClackPromptDriver implements PromptDriver {
     text(options: {
         message: string;

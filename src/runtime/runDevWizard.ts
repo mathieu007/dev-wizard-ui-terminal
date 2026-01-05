@@ -14,18 +14,18 @@ import path from "node:path";
 import { createHash } from "node:crypto";
 import type { Dirent } from "node:fs";
 import { readFile, readdir, stat, writeFile, mkdir } from "node:fs/promises";
-import { loadConfig } from "@dev-wizard/engine/loader/configLoader.js";
+import { loadConfig } from "@ScaffoldStack/dev-wizard-engine/loader/configLoader.js";
 import {
 	INDEX_FILENAMES,
 	ROOT_CONFIG_CANDIDATES,
 	resolveConfigPaths,
 	type ConfigResolution,
-} from "@dev-wizard/engine/loader/configResolver.js";
+} from "@ScaffoldStack/dev-wizard-engine/loader/configResolver.js";
 import type {
 	DevWizardConfig,
 	DevWizardScenario,
 	DevWizardScenarioIdentity,
-} from "@dev-wizard/engine/loader/types.js";
+} from "@ScaffoldStack/dev-wizard-engine/loader/types.js";
 import {
 	buildScenarioPlan,
 	executeScenario,
@@ -33,51 +33,51 @@ import {
 	type ScenarioPlan,
 	type PlanPreferences,
 	WizardExecutionError,
-} from "@dev-wizard/engine/runtime/executor.js";
+} from "@ScaffoldStack/dev-wizard-engine/runtime/executor.js";
 import { ClackPromptDriver } from "./clackPromptDriver.js";
-import { NonInteractivePromptDriver } from "@dev-wizard/engine/runtime/promptDriver.js";
+import { NonInteractivePromptDriver } from "@ScaffoldStack/dev-wizard-engine/runtime/promptDriver.js";
 import type {
 	DevWizardOptions,
 	DevWizardRunResult,
 	PlanExpandSection,
 	IdentitySegmentMetadata,
-} from "@dev-wizard/engine/runtime/types.js";
-import { createLogWriter, createStreamLogWriter } from "@dev-wizard/engine/runtime/logWriter.js";
-import type { WizardLogWriter } from "@dev-wizard/engine/runtime/logWriter.js";
-import { createOtlpLogWriter } from "@dev-wizard/engine/runtime/telemetry/otlpExporter.js";
-import { createPolicyEngine } from "@dev-wizard/engine/runtime/policyEngine.js";
+} from "@ScaffoldStack/dev-wizard-engine/runtime/types.js";
+import { createLogWriter, createStreamLogWriter } from "@ScaffoldStack/dev-wizard-engine/runtime/logWriter.js";
+import type { WizardLogWriter } from "@ScaffoldStack/dev-wizard-engine/runtime/logWriter.js";
+import { createOtlpLogWriter } from "@ScaffoldStack/dev-wizard-engine/runtime/telemetry/otlpExporter.js";
+import { createPolicyEngine } from "@ScaffoldStack/dev-wizard-engine/runtime/policyEngine.js";
 import type {
 	WizardState,
 	CommandExecutionRecord,
 	WizardIdentitySelection,
 	WizardIdentitySegmentSelection,
-} from "@dev-wizard/engine/runtime/state.js";
+} from "@ScaffoldStack/dev-wizard-engine/runtime/state.js";
 import {
 	createCheckpointManager,
 	loadCheckpoint,
-} from "@dev-wizard/engine/runtime/checkpoints.js";
-import type { CheckpointManager } from "@dev-wizard/engine/runtime/checkpoints.js";
+} from "@ScaffoldStack/dev-wizard-engine/runtime/checkpoints.js";
+import type { CheckpointManager } from "@ScaffoldStack/dev-wizard-engine/runtime/checkpoints.js";
 import {
 	formatScenarioPlanNdjson,
 	formatScenarioPlanJson,
 	formatScenarioPlanPretty,
-} from "@dev-wizard/engine/runtime/planFormatter.js";
-import { loadPlugins } from "@dev-wizard/engine/runtime/plugins.js";
-import { createPromptHistoryManager } from "@dev-wizard/engine/runtime/promptHistory.js";
+} from "@ScaffoldStack/dev-wizard-engine/runtime/planFormatter.js";
+import { loadPlugins } from "@ScaffoldStack/dev-wizard-engine/runtime/plugins.js";
+import { createPromptHistoryManager } from "@ScaffoldStack/dev-wizard-engine/runtime/promptHistory.js";
 import {
 	createPromptPersistenceManager,
 	type PromptPersistenceManager,
 	type PromptPersistenceMetadata,
 	type PromptPersistenceExecutionMetadata,
 	sanitizePersistenceSegment,
-} from "@dev-wizard/engine/runtime/promptPersistence.js";
-import { summarizeCapturedOutput } from "@dev-wizard/engine/runtime/capturedOutput.js";
+} from "@ScaffoldStack/dev-wizard-engine/runtime/promptPersistence.js";
+import { summarizeCapturedOutput } from "@ScaffoldStack/dev-wizard-engine/runtime/capturedOutput.js";
 import {
 	readManifest,
 	writeManifest,
 	type DevWizardManifest,
 	type LoadedManifest,
-} from "@dev-wizard/engine/runtime/manifest.js";
+} from "@ScaffoldStack/dev-wizard-engine/runtime/manifest.js";
 import corePackage from "../../package.json" with { type: "json" };
 
 const CORE_VERSION = typeof corePackage.version === "string" ? corePackage.version : "0.0.0";

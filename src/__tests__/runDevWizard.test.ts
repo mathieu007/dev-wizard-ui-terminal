@@ -3,14 +3,14 @@ import os from "node:os";
 import path from "node:path";
 import { PassThrough } from "node:stream";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
-import type { DevWizardConfig } from "@dev-wizard/engine/loader/types.js";
-import type { WizardLogEvent } from "@dev-wizard/engine/runtime/logWriter.js";
-import type { WizardState } from "@dev-wizard/engine/runtime/state.js";
-let buildScenarioPlanImpl!: typeof import("@dev-wizard/engine/runtime/executor.js").buildScenarioPlan;
-let executeScenarioImpl!: typeof import("@dev-wizard/engine/runtime/executor.js").executeScenario;
+import type { DevWizardConfig } from "@ScaffoldStack/dev-wizard-engine/loader/types.js";
+import type { WizardLogEvent } from "@ScaffoldStack/dev-wizard-engine/runtime/logWriter.js";
+import type { WizardState } from "@ScaffoldStack/dev-wizard-engine/runtime/state.js";
+let buildScenarioPlanImpl!: typeof import("@ScaffoldStack/dev-wizard-engine/runtime/executor.js").buildScenarioPlan;
+let executeScenarioImpl!: typeof import("@ScaffoldStack/dev-wizard-engine/runtime/executor.js").executeScenario;
 let SKIP_STEP_OPTION_VALUE!: string;
-let createPromptPersistenceManager!: typeof import("@dev-wizard/engine/runtime/promptPersistence.js").createPromptPersistenceManager;
-let sanitizePersistenceSegment!: typeof import("@dev-wizard/engine/runtime/promptPersistence.js").sanitizePersistenceSegment;
+let createPromptPersistenceManager!: typeof import("@ScaffoldStack/dev-wizard-engine/runtime/promptPersistence.js").createPromptPersistenceManager;
+let sanitizePersistenceSegment!: typeof import("@ScaffoldStack/dev-wizard-engine/runtime/promptPersistence.js").sanitizePersistenceSegment;
 let ClackPromptDriver!: typeof import("../index.js").ClackPromptDriver;
 let runDevWizard!: typeof import("../index.js").runDevWizard;
 
@@ -99,13 +99,13 @@ if (!execaMocks) {
 let tmpDir = "";
 
 beforeAll(async () => {
-	const engine = await import("@dev-wizard/engine/runtime/executor.js");
+	const engine = await import("@ScaffoldStack/dev-wizard-engine/runtime/executor.js");
 	buildScenarioPlanImpl = engine.buildScenarioPlan;
 	executeScenarioImpl = engine.executeScenario;
 	SKIP_STEP_OPTION_VALUE = engine.SKIP_STEP_OPTION_VALUE;
 
 	const promptPersistence = await import(
-		"@dev-wizard/engine/runtime/promptPersistence.js"
+		"@ScaffoldStack/dev-wizard-engine/runtime/promptPersistence.js"
 	);
 	createPromptPersistenceManager = promptPersistence.createPromptPersistenceManager;
 	sanitizePersistenceSegment = promptPersistence.sanitizePersistenceSegment;

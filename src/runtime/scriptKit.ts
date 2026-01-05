@@ -1,4 +1,4 @@
-import type { DevWizardRunResult } from "@dev-wizard/engine";
+import type { DevWizardRunResult } from "@ScaffoldStack/dev-wizard-engine";
 import {
 	createMaintenanceOptions,
 	createProjectsOrchestratorOptions,
@@ -6,7 +6,7 @@ import {
 	type MaintenanceWizardOptions,
 	type ProjectsOrchestratorOptions,
 	type WorkspaceWizardOptions,
-} from "@dev-wizard/engine";
+} from "@ScaffoldStack/dev-wizard-engine";
 import { runDevWizard } from "./runDevWizard.js";
 
 export async function runProjectsOrchestrator(

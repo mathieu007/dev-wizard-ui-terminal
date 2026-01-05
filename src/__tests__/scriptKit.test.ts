@@ -1,5 +1,5 @@
 import { describe, expect, test, vi } from "vitest";
-import type { DevWizardOptions, DevWizardRunResult } from "@dev-wizard/engine";
+import type { DevWizardOptions, DevWizardRunResult } from "@ScaffoldStack/dev-wizard-engine";
 
 const engineMocks = vi.hoisted(() => ({
 	createProjectsOrchestratorOptions: vi.fn(async () => ({
@@ -14,7 +14,7 @@ const engineMocks = vi.hoisted(() => ({
 	} as DevWizardOptions)),
 }));
 
-vi.mock("@dev-wizard/engine", () => ({
+vi.mock("@ScaffoldStack/dev-wizard-engine", () => ({
 	createProjectsOrchestratorOptions: engineMocks.createProjectsOrchestratorOptions,
 	createMaintenanceOptions: engineMocks.createMaintenanceOptions,
 }));

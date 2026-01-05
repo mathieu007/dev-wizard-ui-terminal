@@ -1,4 +1,4 @@
-import { createMaintenanceOptions, createProjectsOrchestratorOptions, createWorkspaceOptions, } from "@dev-wizard/engine";
+import { createMaintenanceOptions, createProjectsOrchestratorOptions, createWorkspaceOptions, } from "@ScaffoldStack/dev-wizard-engine";
 import { runDevWizard } from "./runDevWizard.js";
 export async function runProjectsOrchestrator(options) {
     const wizardOptions = await createProjectsOrchestratorOptions(options);

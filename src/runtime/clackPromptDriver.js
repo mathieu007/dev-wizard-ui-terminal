@@ -1,5 +1,5 @@
 import { confirm, isCancel, multiselect, select, text, } from "@clack/prompts";
-import { PromptCancelledError } from "@dev-wizard/engine/runtime/promptDriver.js";
+import { PromptCancelledError } from "@ScaffoldStack/dev-wizard-engine/runtime/promptDriver.js";
 import { createTextPromptWithHistory } from "./textPrompt.js";
 import { orderedMultiselect } from "./prompts/orderedMultiselect.js";
 import { selectWithShortcuts } from "./shortcutPrompts.js";

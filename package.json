@@ -20,6 +20,10 @@
     "access": "public",
     "registry": "https://npm.pkg.github.com"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ScaffoldStack/dev-wizard-ui-terminal.git"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "clean": "rimraf dist",

@@ -29,6 +29,7 @@
     "clean": "rimraf dist",
     "lint": "eslint src --ext .ts --max-warnings=0",
     "prepublishOnly": "pnpm run build",
+     "clean:all": "rm -rf ./node_modules .pnpm-store .turbo .turbo-cache .cache .next .output dist build coverage .reports",
     "test": "pnpm exec vitest run --passWithNoTests --config /home/math/projects/dev-workspace/packages/dev-wizard-ui-terminal/vitest.config.ts",
     "typecheck": "tsc -p tsconfig.test.json",
     "build:quick": "pnpm exec tsc -p tsconfig.build.json --pretty false --incremental --tsBuildInfoFile /home/math/projects/dev-workspace/.dev-wizard/cache/tsbuildinfo/_ScaffoldStack_dev-wizard-ui-terminal.tsbuildinfo",

@@ -12,18 +12,18 @@ export default defineConfig({
 				replacement: execaMock,
 			},
 			{
-				find: /^@dev-wizard\/engine$/,
+				find: /^@ScaffoldStack/dev-wizard-engine$/,
 				replacement: path.join(engineRoot, "index.ts"),
 			},
 			{
-				find: /^@dev-wizard\/engine\/(.*)$/,
+				find: /^@ScaffoldStack/dev-wizard-engine\/(.*)$/,
 				replacement: `${engineRoot}/$1`,
 			},
 		],
 	},
 	test: {
 		deps: {
-			inline: ["execa", /^@dev-wizard\/engine/],
+			inline: ["execa", /^@ScaffoldStack/dev-wizard-engine/],
 		},
 		setupFiles: ["./vitest.setup.ts"],
 	},

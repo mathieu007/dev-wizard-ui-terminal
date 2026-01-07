@@ -477,7 +477,11 @@ export async function runDevWizard(options) {
         ? true
         : options.phase === "collect"
             ? false
-            : Boolean(options.loadPersistedAnswers) || !interactiveTty;
+            : !interactiveTty ||
+                (usePromptPersistenceAnswers &&
+                    Boolean(options.loadPersistedAnswers) &&
+                    Boolean(options.answersPathUsed) &&
+                    !options.answersPathImplicit);
     const promptDriver = nonInteractive
         ? new NonInteractivePromptDriver()
         : new ClackPromptDriver();

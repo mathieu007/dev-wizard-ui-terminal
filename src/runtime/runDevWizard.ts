@@ -727,10 +727,10 @@ if (isRegisterMode) {
 			throw error;
 		}
 	}
-	if (options.loadPersistedAnswers) {
-		if (options.answersPathUsed) {
-			log.info(
-				`Loaded prompt overrides from ${chalk.cyan(options.answersPathUsed)}.`,
+		if (options.loadPersistedAnswers) {
+			if (options.answersPathUsed) {
+				log.info(
+					`Loaded prompt overrides from ${chalk.cyan(options.answersPathUsed)}.`,
 			);
 		} else {
 			log.info("Loaded prompt overrides from stdin (--answers -).");
@@ -753,7 +753,8 @@ if (isRegisterMode) {
 			: options.phase === "collect"
 				? false
 				: !interactiveTty ||
-					(Boolean(options.loadPersistedAnswers) &&
+					(usePromptPersistenceAnswers &&
+						Boolean(options.loadPersistedAnswers) &&
 						Boolean(options.answersPathUsed) &&
 						!options.answersPathImplicit);
 

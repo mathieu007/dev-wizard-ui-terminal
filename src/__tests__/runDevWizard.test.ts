@@ -2333,6 +2333,7 @@ describe("git-worktree-guard step", () => {
 
 		expect(gitCalls).toEqual([
 			"git add -A",
+			"git status --porcelain",
 			"git commit -m automation cleanup",
 			"git push",
 		]);
@@ -2399,6 +2400,7 @@ describe("git-worktree-guard step", () => {
 
 		expect(gitCalls).toEqual([
 			"git add -A",
+			"git status --porcelain",
 			"git commit -m automation cleanup",
 			"git push",
 			"git rev-parse --abbrev-ref HEAD",
@@ -2506,6 +2508,7 @@ describe("git-worktree-guard step", () => {
 		expect(gitCalls).toEqual([
 			"git switch -c feature/automation",
 			"git add -A",
+			"git status --porcelain",
 			"git commit -m automation cleanup",
 			"git push",
 		]);
